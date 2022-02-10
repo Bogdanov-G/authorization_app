@@ -21,8 +21,8 @@ func Start() {
 	pool := getDBPool()
 
 	router := mux.NewRouter()
-	th := TokenHandler{
-		service.NewTokenService(domain.NewTokenRepository(pool)),
+	th := AuthHandler{
+		service.NewAuthService(domain.NewAuthRepository(pool)),
 	}
 
 	router.HandleFunc("/auth/login", th.Login).Methods(http.MethodPost)
