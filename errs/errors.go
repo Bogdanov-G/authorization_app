@@ -42,3 +42,9 @@ func NewValidationError(message string) *AppError {
 func NewBadRequestError(message string) *AppError {
 	return &AppError{http.StatusBadRequest, message}
 }
+
+// NewUnauthorizedError creates an error object with HTTP status code 403 and using the given
+// string as a message.
+func NewUnauthorizedError(message string) *AppError {
+	return &AppError{http.StatusForbidden, message}
+}
