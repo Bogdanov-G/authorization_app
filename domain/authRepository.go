@@ -33,6 +33,9 @@ func (s AuthRepository) FindUser(name, pass string) (*Login, *errs.AppError) {
 		LEFT JOIN accounts a ON (u.customer_id = a.customer_id)
 		WHERE username = $1 AND password = $2
 		GROUP BY u.username ;`, name, pass)
+
+	// TBD - add encryption for stoared passwords
+
 	err := row.Scan(&login.Username, &login.CustomerId, pq.Array(&login.Accounts), &login.Role)
 	if err != nil {
 		if err == sql.ErrNoRows {
