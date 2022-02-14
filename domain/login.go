@@ -13,10 +13,10 @@ const TokenDuration = time.Hour
 const SigningKeySample = "SignInKeySample"
 
 type Login struct {
-	Username   string          `db:"username"`
-	CustomerId sql.NullString  `db:"customer_id"`
-	Accounts   []sql.NullInt64 `db:"accounts_ids"`
-	Role       string          `db:"role"`
+	Username   string           `db:"username"`
+	CustomerId sql.NullString   `db:"customer_id"`
+	Accounts   []sql.NullString `db:"accounts_ids"`
+	Role       string           `db:"role"`
 }
 
 func (l Login) GenerateToken() (*string, *errs.AppError) {
