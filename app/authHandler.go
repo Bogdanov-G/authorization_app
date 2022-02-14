@@ -2,12 +2,10 @@ package app
 
 import (
 	"encoding/json"
-	"encoding/xml"
-	"net/http"
-
 	"github.com/Bogdanov-G/authorization_app/dto"
 	"github.com/Bogdanov-G/authorization_app/errs"
 	"github.com/Bogdanov-G/authorization_app/service"
+	"net/http"
 )
 
 type AuthHandler struct {
@@ -38,5 +36,31 @@ func (th AuthHandler) Register(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (th AuthHandler) Verify(rw http.ResponseWriter, r *http.Request) {
-	// TBD
+	urlParams := map[string]string{}
+
+	for k := range r.URL.Query() {
+		urlParams[k] = r.URL.Query().Get(k)
+	}
+	if urlParams["token"] == "" {
+		rw.WriteHeader(http.StatusBadRequest)
+		writeResponse(rw, &Response{false}, r)
+		return
+	}
+
+	authorized, appErr := th.service.Verify(urlParams)
+	if appErr != nil {
+		rw.WriteHeader(appErr.Code)
+		writeResponse(rw, &Response{false}, r)
+		return
+	}
+	if authorized {
+		rw.WriteHeader(http.StatusOK)
+	} else {
+		rw.WriteHeader(http.StatusForbidden)
+	}
+	writeResponse(rw, &Response{authorized}, r)
+}
+
+type Response struct {
+	IsAuthorized bool `xml:"isAuthorized" json:"isAuthorized,omitempty"`
 }
