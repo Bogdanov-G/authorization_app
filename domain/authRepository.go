@@ -13,7 +13,7 @@ type AuthRepository struct {
 	pool *sql.DB
 }
 
-type AuthRepository_I interface {
+type AuthRepositoryI interface {
 	FindUser(string, string) (Login, error)
 }
 
@@ -34,7 +34,7 @@ func (s AuthRepository) FindUser(name, pass string) (*Login, *errs.AppError) {
 		WHERE username = $1 AND password = $2
 		GROUP BY u.username ;`, name, pass)
 
-	// TBD - add encryption for stoared passwords
+	// TBD - add encryption for stored passwords
 
 	err := row.Scan(&login.Username, &login.CustomerId, pq.Array(&login.Accounts), &login.Role)
 	if err != nil {

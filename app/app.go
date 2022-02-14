@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Start() starts server and make it ready to handle requests on incoming
+// Start starts server and make it ready to handle requests on incoming
 // connections.
 func Start() {
 
@@ -29,16 +29,16 @@ func Start() {
 	router.HandleFunc("/auth/register", th.Register).Methods(http.MethodPost)
 	router.HandleFunc("/auth/verify", th.Verify).Methods(http.MethodGet)
 
-	addres := os.Getenv("SRV_ADDR")
+	address := os.Getenv("SRV_ADDR")
 	port := os.Getenv("SRV_PORT")
-	err := http.ListenAndServe(fmt.Sprintf("%s:%s", addres, port), router)
+	err := http.ListenAndServe(fmt.Sprintf("%s:%s", address, port), router)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
-	logger.Info(fmt.Sprintf("Server started as http://%s:%s", addres, port))
+	logger.Info(fmt.Sprintf("Server started as http://%s:%s", address, port))
 }
 
-// sanityCheck() checks whether all used global environment variables have been
+// sanityCheck checks whether all used global environment variables have been
 // presented.
 func sanityCheck() {
 	// All global variables required for app have to be included here.
@@ -59,20 +59,20 @@ func sanityCheck() {
 	}
 }
 
-// getDBPool() opens database and verify that the data source name is valid via
+// getDBPool opens database and verify that the data source name is valid via
 // calling Ping.
 func getDBPool() *sql.DB {
 	var err error
 	var pool *sql.DB
 
-	dbAddres := os.Getenv("DB_ADDR")
+	dbAddress := os.Getenv("DB_ADDR")
 	dbPort := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASS")
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s",
-		dbAddres, dbPort, dbUser, dbPassword, dbName)
+		dbAddress, dbPort, dbUser, dbPassword, dbName)
 
 	pool, err = sql.Open("postgres", connStr)
 	if err != nil {

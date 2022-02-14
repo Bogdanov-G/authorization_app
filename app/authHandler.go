@@ -2,12 +2,10 @@ package app
 
 import (
 	"encoding/json"
-	"encoding/xml"
-	"net/http"
-
 	"github.com/Bogdanov-G/authorization_app/dto"
 	"github.com/Bogdanov-G/authorization_app/errs"
 	"github.com/Bogdanov-G/authorization_app/service"
+	"net/http"
 )
 
 type AuthHandler struct {
@@ -21,15 +19,15 @@ func (th AuthHandler) Login(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		appErr := errs.NewBadRequestError("bad request error")
 		rw.WriteHeader(appErr.Code)
-		writeResponse(rw, appErr.AsMessage(), r.Header.Get("Content-Type"))
+		writeResponse(rw, appErr.AsMessage(), r)
 		return
 	}
 	token, appErr := th.service.Login(logReq)
 	if appErr != nil {
 		rw.WriteHeader(appErr.Code)
-		writeResponse(rw, appErr.AsMessage(), r.Header.Get("Content-Type"))
+		writeResponse(rw, appErr.AsMessage(), r)
 	} else {
-		writeResponse(rw, token, r.Header.Get("Content-Type"))
+		writeResponse(rw, token, r)
 	}
 }
 
@@ -38,22 +36,31 @@ func (th AuthHandler) Register(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (th AuthHandler) Verify(rw http.ResponseWriter, r *http.Request) {
-	// TBD
+	urlParams := map[string]string{}
+
+	for k := range r.URL.Query() {
+		urlParams[k] = r.URL.Query().Get(k)
+	}
+	if urlParams["token"] == "" {
+		rw.WriteHeader(http.StatusBadRequest)
+		writeResponse(rw, &Response{false}, r)
+		return
+	}
+
+	authorized, appErr := th.service.Verify(urlParams)
+	if appErr != nil {
+		rw.WriteHeader(appErr.Code)
+		writeResponse(rw, &Response{false}, r)
+		return
+	}
+	if authorized {
+		rw.WriteHeader(http.StatusOK)
+	} else {
+		rw.WriteHeader(http.StatusForbidden)
+	}
+	writeResponse(rw, &Response{authorized}, r)
 }
 
-// writeResponse() writes HTTP responses in JSON or XML formats depending on
-// give contentType value.
-func writeResponse(rw http.ResponseWriter, rwInterface interface{},
-	contentType string) {
-	if contentType == "application/xml" {
-		rw.Header().Add("Content-Type", "application/xml")
-		if err := xml.NewEncoder(rw).Encode(rwInterface); err != nil {
-			panic(err)
-		}
-	} else {
-		rw.Header().Add("Content-Type", "application/json")
-		if err := json.NewEncoder(rw).Encode(rwInterface); err != nil {
-			panic(err)
-		}
-	}
+type Response struct {
+	IsAuthorized bool `xml:"isAuthorized" json:"isAuthorized,omitempty"`
 }
